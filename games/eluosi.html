@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>俄罗斯方块</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+            margin: 0;
+        }
+        #box {
+            width: 252px;
+            font: 25px/25px 宋体;
+            background: #000;
+            color: #9f9;
+            border: #999 20px ridge;
+            text-shadow: 2px 3px 1px #0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="box"></div>
+    <script>
+        // 定义一个数组，用于存储游戏地图
+        var map = eval("[" + Array(23).join("0x801,") + "0xfff]");
+        // 定义一个数组，用于存储各种形状的方块
+        var tatris = [[0x6600], [0x2222, 0xf00], [0xc600, 0x2640], [0x6c00, 0x4620], [0x4460, 0x2e0, 0x6220, 0x740], [0x2260, 0xe20, 0x6440, 0x4700], [0x2620, 0x720, 0x2320, 0x2700]];
+        // 定义一个对象，用于存储键盘按键与对应操作的映射关系
+        var keycom = { "38": "rotate(1)", "40": "down()", "37": "move(2,1)", "39": "move(0.5,-1)" };
+        // 定义一些变量，用于存储当前方块、位置、备份等信息
+        var dia, pos, bak, run;
+
+        // 开始游戏
+        function start() {
+            // 随机选择一个方块
+            dia = tatris[~~(Math.random() * 7)];
+            // 初始化位置和备份
+            bak = pos = { fk: [], y: 0, x: 4, s: ~~(Math.random() * 4) };
+            // 调用旋转函数，将方块旋转到初始位置
+            rotate(0);
+        }
+
+        // 游戏结束
+        function over() {
+            // 移除键盘事件监听
+            document.onkeydown = null;
+            // 清除定时器
+            clearInterval(run);
+            // 弹出游戏结束提示
+            alert("游戏结束！");
+        }
+
+        // 更新游戏界面
+        function update(t) {
+            // 备份当前位置
+            bak = { fk: pos.fk.slice(0), y: pos.y, x: pos.x, s: pos.s };
+            // 如果是第一次更新，则不进行任何操作
+            if (t) return;
+            // 将地图转换为字符串，用于显示
+            for (var i = 0, a2 = ""; i < 22; i++)
+                a2 += map[i].toString(2).slice(1, -1) + "<br/>";
+            // 将当前方块添加到地图上
+            for (var i = 0, n; i < 4; i++)
+                if (/([^0]+)/.test(bak.fk[i].toString(2).replace(/1/g, "\u25a1")))
+                    a2 = a2.substr(0, n = (bak.y + i + 1) * 15 - RegExp.$_.length - 4) + RegExp.$1 + a2.slice(n + RegExp.$1.length);
+            // 将地图显示在页面上
+            document.getElementById("box").innerHTML = a2.replace(/1/g, "\u25a0").replace(/0/g, "\u3000");
+        }
+
+        // 判断当前位置是否合法
+        function is() {
+            // 遍历当前方块，判断是否与地图重叠
+            for (var i = 0; i < 4; i++)
+                if ((pos.fk[i] & map[pos.y + i]) != 0) return pos = bak;
+        }
+
+        // 旋转方块
+        function rotate(r) {
+            // 获取当前方块的旋转状态
+            var f = dia[pos.s = (pos.s + r) % dia.length];
+            // 将方块旋转到指定位置
+            for (var i = 0; i < 4; i++)
+                pos.fk[i] = (f >> (12 - i * 4) & 15) << pos.x;
+            // 更新游戏界面
+            update(is());
+        }
+
+        // 方块下落
+        function down() {
+            // 将方块下移一格
+            ++pos.y;
+            // 判断当前位置是否合法
+            if (is()) {
+                // 将方块添加到地图上
+                for (var i = 0; i < 4 && pos.y + i < 22; i++)
+                    if ((map[pos.y + i] |= pos.fk[i]) == 0xfff)
+                        map.splice(pos.y + i, 1), map.unshift(0x801);
+                // 判断游戏是否结束
+                if (map[1] != 0x801) return over();
+                // 开始新的游戏
+                start();
+            }
+            update();
+        }
+
+        function move(t, k) {
+            // 移动方块
+            pos.x += k;
+            // 将方块移动指定距离
+            for (var i = 0; i < 4; i++)
+                // 更新方块的位置
+                pos.fk[i] *= t;
+            update(is());
+            // 更新游戏界面
+        }
+
+        document.onkeydown = function (e) {
+            // 监听键盘事件
+            eval(keycom[(e ? e : event).keyCode]);
+            // 根据按键，执行对应的操作
+        };
+
+        start();
+        // 开始游戏
+
+        run = setInterval("down()", 400);
+        // 设置定时器，每隔一段时间调用一次方块下落函数
+
+    </script>
+</body>
+
+</html>
