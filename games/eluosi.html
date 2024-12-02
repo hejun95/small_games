@@ -86,7 +86,7 @@
             // 更新积分
             if (linesClearedThisRound > 0) {
                 linesCleared += linesClearedThisRound;
-                score += linesCleared * 100; // 每消除一行，得100分
+                score += linesClearedThisRound * 100; // 每消除一行，得100分
                 document.getElementById('score').textContent = "积分: " + score;
             }
 
@@ -100,13 +100,16 @@
 
             // 将地图转换为字符串，用于显示
             let a2 = "";
-            for (let i = 0; i < 22; i++)
+            for (let i = 0; i < 22; i++){
                 a2 += map[i].toString(2).slice(1, -1) + "<br/>";
+            }
 
             // 将当前方块添加到地图上
-            for (let i = 0, n; i < 4; i++)
-                if (/([^0]+)/.test(bak.fk[i].toString(2).replace(/1/g, "\u25a1")))
+            for (let i = 0, n; i < 4; i++){
+                if (/([^0]+)/.test(bak.fk[i].toString(2).replace(/1/g, "\u25a1"))){
                     a2 = a2.substr(0, n = (bak.y + i + 1) * 15 - RegExp.$_.length - 4) + RegExp.$1 + a2.slice(n + RegExp.$1.length);
+                }
+            }
 
             // 将地图显示在页面上
             document.getElementById("box").innerHTML = a2.replace(/1/g, "\u25a0").replace(/0/g, "\u3000");
@@ -138,10 +141,10 @@
             if (is()) {
                 // 将方块添加到地图上
                 for (let i = 0; i < 4 && pos.y + i < 22; i++)
-                    if ((map[pos.y + i] |= pos.fk[i]) == 0xfff)
-                        map.splice(pos.y + i, 1), map.unshift(0x801);
-                // 判断游戏是否结束
-                if (map[1] != 0x801) return over();
+                    if ((map[pos.y + i] |= pos.fk[i]) == 0xfff){
+                        // 判断游戏是否结束
+                        if (map[1] != 0x801) return over();
+                    }
                 // 开始新的游戏
                 start();
             }

@@ -52,17 +52,25 @@
         // 初始化得分
         let score = 0;
 
+        // 蛇头图片
+        const headImg = new Image();
+        headImg.src = '../img/shetou.jpg'; // 替换为您的图片路径
+
         // 绘制蛇的部分
-        function drawSnakePart(snakePart) {
-            ctx.fillStyle = 'green';
-            ctx.fillRect(snakePart.x, snakePart.y, box, box);
-            ctx.strokeStyle = 'darkgreen';
-            ctx.strokeRect(snakePart.x, snakePart.y, box, box);
+        function drawSnakePart(snakePart, isHead = false) {
+            if (isHead) {
+                ctx.drawImage(headImg, snakePart.x, snakePart.y, box, box);
+            } else {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(snakePart.x, snakePart.y, box, box);
+                ctx.strokeStyle = 'darkgreen';
+                ctx.strokeRect(snakePart.x, snakePart.y, box, box);
+            }
         }
 
         // 绘制蛇
         function drawSnake() {
-            snake.forEach(drawSnakePart);
+            snake.forEach((part, index) => drawSnakePart(part, index === 0));
         }
 
         // 绘制食物
@@ -109,7 +117,7 @@
 
                 // 每吃掉一个食物，游戏速度增加
                 clearInterval(game);
-                speed -= 10; // 减少时间间隔，加快速度
+                speed -= 2; // 减少时间间隔，加快速度
                 game = setInterval(updateGame, speed > 100 ? speed : 100); // 设置新的时间间隔，但最小不超过100毫秒
             } else {
                 snake.pop();
