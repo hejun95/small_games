@@ -70,7 +70,7 @@
         }
 
         calculateBrickDimensions();
-        
+
         // 随机生成砖块，集中在屏幕上半部分
         function generateBricks() {
             bricks.length = 0; // 清空之前的砖块
@@ -87,7 +87,8 @@
         }
 
         generateBricks();
-
+        // 添加一个变量来控制游戏是否已经开始
+        let gameStarted = false;
         // 监听键盘事件
         document.addEventListener('keydown', keyDownHandler, false);
         document.addEventListener('keyup', keyUpHandler, false);
@@ -101,6 +102,8 @@
                 rightPressed = true;
             } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
                 leftPressed = true;
+            } else if (e.key === ' ') { // 添加对空格键的监听
+                gameStarted = true; // 按下空格键时开始游戏
             }
         }
 
@@ -156,8 +159,17 @@
             });
         }
 
-        // 游戏主循环
+        // 修改游戏主循环，只有在游戏开始后才会运行
         function draw() {
+            if (!gameStarted) {
+                // 游戏未开始时显示提示信息
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#0095DD';
+                ctx.fillText('按空格键开始游戏', canvas.width / 2 - 60, canvas.height / 2);
+                requestAnimationFrame(draw);
+                return;
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawBricks();
             drawBall();
@@ -171,7 +183,7 @@
             // 球碰到顶部时反弹
             if (ball.y + ball.dy < ball.radius) {
                 ball.dy = -ball.dy;
-            // 球碰到底部时游戏结束
+                // 球碰到底部时游戏结束
             } else if (ball.y + ball.dy > canvas.height - ball.radius) {
                 if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
                     ball.dy = -ball.dy;
